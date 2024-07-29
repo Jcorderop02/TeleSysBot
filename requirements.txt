@@ -1,0 +1,5 @@
+Flask==3.0.3
+python-dotenv==1.0.1
+python-telegram-bot==21.4
+psutil==6.0.0
+
