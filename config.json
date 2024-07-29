@@ -1,0 +1,13 @@
+{
+    "update": true,
+    "stats": true,
+    "unblock": true,
+    "blocked": true,
+    "authenticated": true,
+    "system_status": true,
+    "start_container": true,
+    "stop_container": true,
+    "restart_container": true,
+    "status_container": true,
+    "container_list": true
+}
