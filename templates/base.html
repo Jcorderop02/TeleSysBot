@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Admin Panel</title>
+    <meta name="description" content="Panel de administración para gestionar el bot y usuarios">
+    <meta name="author" content="Juan Cordero">
+    <link rel="icon" href="/path/to/favicon.ico">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.dark-mode {
+            background-color: #343a40;
+            color: white;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .card-text {
+            font-size: 1.5rem;
+        }
+        .display-4 {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 1rem 0;
+        }
+        .footer.dark-mode {
+            background-color: #1d2124;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        .form-check-label {
+            margin-left: 1.25rem;
+        }
+        .form-check-input {
+            margin-left: -1.25rem;
+        }
+        .navbar-nav .nav-item + .nav-item {
+            margin-left: 1rem;
+        }
+        .alert-dismissible .close {
+            position: absolute;
+            top: 0;
+            right: 1rem;
+            padding: 1rem;
+            color: inherit;
+        }
+        .btn-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-icon i {
+            margin-right: 0.5rem;
+        }
+        .dark-mode .form-control {
+            background-color: #495057;
+            color: white;
+            border: 1px solid #ced4da;
+        }
+        .dark-mode .form-control::placeholder {
+            color: #adb5bd;
+        }
+        .dark-mode .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .dark-mode .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+        .dark-mode .list-group-item {
+            background-color: #495057;
+            color: white;
+            border-color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#"><i class="fas fa-cogs"></i> Admin Panel</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('index') }}"><i class="fas fa-sliders-h"></i> Configuración</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('manage_users') }}"><i class="fas fa-users"></i> Gestionar Usuarios</a>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-dark btn-icon" id="theme-toggle"><i class="fas fa-moon"></i> Tema Oscuro</button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <main role="main" class="container">
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="footer mt-auto py-3 bg-dark text-white">
+        <div class="container text-center">
+            <span>© 2023 Juan Cordero</span>
+        </div>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js" integrity="sha384-pzjw8f+ua7Kw1TIqPQY+3Bh1wT2yK2pZTSPexf4yDTEKjFHO/F65RGHNf9eyw4CD" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-pzjw8f+ua7Kw1TIqPQY+3Bh1wT2yK2pZTSPexf4yDTEKjFHO/F65RGHNf9eyw4CD" crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.querySelector('.footer').classList.add('dark-mode');
+                document.getElementById('theme-toggle').innerHTML = '<i class="fas fa-sun"></i> Tema Claro';
+            }
+        });
+
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            document.querySelector('.footer').classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+                this.innerHTML = '<i class="fas fa-sun"></i> Tema Claro';
+            } else {
+                localStorage.removeItem('theme');
+                this.innerHTML = '<i class="fas fa-moon"></i> Tema Oscuro';
+            }
+        });
+    </script>
+</body>
+</html>

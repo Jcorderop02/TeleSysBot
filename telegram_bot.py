@@ -4,13 +4,13 @@ import subprocess
 import telegram
 import psutil
 import asyncio
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, CallbackQueryHandler
-from dotenv import load_dotenv
 import json
 import os
 import threading
-from flask import Flask, render_template, request, redirect, url_for, flash
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, CallbackQueryHandler
+from dotenv import load_dotenv
+from shared import authenticated_users, blocked_users, load_authenticated_users, save_authenticated_users, load_blocked_users, save_blocked_users
 
 # Cargar variables de entorno desde el archivo .env
 load_dotenv()
@@ -25,17 +25,12 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
-app.secret_key = 'supersecretkey'
-
-# Set para rastrear usuarios autenticados
-authenticated_users = set()
+# Cargar el estado de autenticación y bloqueos al iniciar el bot
+authenticated_users.update(load_authenticated_users())
+blocked_users.update(load_blocked_users())
 
 # Diccionario para rastrear intentos fallidos de contraseña
 failed_attempts = {}
-
-# Diccionario para rastrear usuarios bloqueados (ID y nombre de usuario)
-blocked_users = {}
 
 # Función para cargar la configuración de comandos habilitados desde config.json
 def load_config():
@@ -73,82 +68,14 @@ def save_command_config(config):
     except Exception as e:
         logger.error(f"Error al guardar config.json: {e}")
 
-# Ruta para cargar la configuración
-@app.route('/')
-def index():
-    config = load_config()
-    return render_template('index.html', config=config)
-
-# Ruta para actualizar la configuración
-@app.route('/update_config', methods=['POST'])
-def update_config():
-    config = load_config()
-    for command in config.keys():
-        config[command] = request.form.get(command) == 'on'
-    save_command_config(config)
-    flash('Configuración actualizada correctamente.')
-    return redirect(url_for('index'))
-
 def is_command_enabled(command):
     config = load_config()
     return config.get(command, False)
-
-# Función para cargar los usuarios autenticados desde un archivo
-def load_authenticated_users():
-    try:
-        with open("authenticated_users.txt", "r") as file:
-            users = file.read().splitlines()
-            logger.info("Usuarios autenticados cargados correctamente.")
-            return set(int(user) for user in users)
-    except FileNotFoundError:
-        logger.warning("El archivo authenticated_users.txt no existe. Se creará uno nuevo.")
-        return set()
-
-# Función para guardar los usuarios autenticados en un archivo
-def save_authenticated_users():
-    try:
-        with open("authenticated_users.txt", "w") as file:
-            for user in authenticated_users:
-                file.write(f"{user}\n")
-            logger.info("Usuarios autenticados guardados correctamente.")
-    except Exception as e:
-        logger.error(f"Error al guardar authenticated_users.txt: {e}")
-
-# Función para cargar los usuarios bloqueados desde un archivo
-def load_blocked_users():
-    try:
-        with open("blocked_users.txt", "r") as file:
-            users = {}
-            for line in file:
-                name, user_id = line.strip().split(' - ')
-                users[int(user_id)] = name
-            logger.info("Usuarios bloqueados cargados correctamente.")
-            return users
-    except FileNotFoundError:
-        logger.warning("El archivo blocked_users.txt no existe. Se creará uno nuevo.")
-        return {}
-    except Exception as e:
-        logger.error(f"Error al cargar blocked_users.txt: {e}")
-        return {}
-
-# Función para guardar los usuarios bloqueados en un archivo
-def save_blocked_users():
-    try:
-        with open("blocked_users.txt", "w") as file:
-            for user_id, name in blocked_users.items():
-                file.write(f"{name} - {user_id}\n")
-            logger.info("Usuarios bloqueados guardados correctamente.")
-    except Exception as e:
-        logger.error(f"Error al guardar blocked_users.txt: {e}")
 
 # Función para enviar notificaciones al administrador
 async def notify_admin(message: str):
     bot = telegram.Bot(token=TOKEN)
     await bot.send_message(chat_id=ADMIN_ID, text=message, parse_mode='HTML')
-
-# Cargar el estado de autenticación y bloqueos al iniciar el bot
-authenticated_users = load_authenticated_users()
-blocked_users = load_blocked_users()
 
 # Comando /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -442,7 +369,7 @@ async def monitor_resources():
         if disk_info.percent > 80:
             await notify_admin(f'⚠️ Uso de Disco alto: {disk_info.percent}%')
         
-        await asyncio.sleep(60)  # Monitorea cada minuto
+        await asyncio.sleep(60)
 
 # Comando /start_container para iniciar un contenedor específico
 async def start_container(update: Update, context: ContextTypes.DEFAULT_TYPE, container_name=None, from_callback=False) -> None:
@@ -483,7 +410,7 @@ async def start_container(update: Update, context: ContextTypes.DEFAULT_TYPE, co
                 else:
                     await update.message.reply_text(f'✅ El contenedor {container_name} se ha iniciado por completo.')
                 break
-            await asyncio.sleep(1)  # Espera un segundo antes de verificar nuevamente
+            await asyncio.sleep(1) 
 
     except subprocess.CalledProcessError as e:
         logger.error(f"Error al iniciar el contenedor {container_name}: {str(e)}")
@@ -985,7 +912,8 @@ def main() -> None:
     application.run_polling()
 
 def run_flask():
-    app.run(debug=True, use_reloader=False, host='0.0.0.0', port=5000)
+    from app import app  # Importar el objeto app desde app.py
+    app.run(debug=False, use_reloader=False, host='0.0.0.0', port=5000)
 
 if __name__ == '__main__':
     main()
