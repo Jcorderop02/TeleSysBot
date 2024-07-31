@@ -25,7 +25,7 @@
     <img alt="Status" src="https://img.shields.io/badge/status-active-success.svg?style=for-the-badge" />
   </a>
   <a href="#">
-    <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-orange?style=for-the-badge" />
+    <img alt="Version" src="https://img.shields.io/badge/version-1.0.1-orange?style=for-the-badge" />
   </a>
 </p>
 
@@ -33,12 +33,16 @@
 
 - [Introducción](#introducción)
 - [Características](#características)
+- [Requisitos del Sistema](#requisitos-del-sistema)
 - [Instalación](#instalación)
 - [Uso](#uso)
-  - [Comandos de Telegram](#comandos-de-telegram)
+  - [Comandos Disponibles](#comandos-disponibles)
+  - [Configuración](#configuración)
   - [Interfaz Web](#interfaz-web)
-- [Configuración](#configuración)
-- [Contribuyendo](#contribuyendo)
+- [Notificaciones](#notificaciones)
+- [Arquitectura del Proyecto](#arquitectura-del-proyecto)
+- [Changelog](#changelog)
+- [Contribuciones](#contribuciones)
 - [Licencia](#licencia)
 
 ## Introducción
@@ -52,6 +56,14 @@
 - **Gestión de Contenedores**: Inicia, detén, reinicia y verifica el estado de los contenedores Docker.
 - **Gestión de Usuarios**: Autentica usuarios, gestiona usuarios bloqueados.
 - **Monitoreo del Sistema**: Monitorea el uso de recursos del sistema.
+- **Dashboard en Tiempo Real**: Muestra estadísticas del sistema con actualización automática.
+- **Modo Oscuro/Claro**: Alterna entre tema oscuro y claro en la interfaz web.
+
+## Requisitos del Sistema
+
+- Python 3.8 o superior
+- Docker (para la gestión de contenedores) (opcional)
+- Dependencias adicionales listadas en `requirements.txt`
 
 ## Instalación
 
@@ -104,6 +116,39 @@ El bot incluye una interfaz web que permite actualizar la configuración de los 
 ### Notificaciones
 
 El bot enviará notificaciones al administrador cuando ocurran ciertos eventos, como múltiples intentos fallidos de autenticación o alto uso de recursos del sistema.
+
+## Arquitectura del Proyecto
+
+- **telegram_bot.py**: Contiene la lógica principal del bot de Telegram.
+- **shared.py**: Módulo compartido para gestionar usuarios autenticados y bloqueados.
+- **app.py**: Configuración de la aplicación Flask.
+- **templates/**: Directorio que contiene las plantillas HTML para la interfaz web.
+
+## Changelog
+
+### Versión 1.0.1
+
+#### Nuevas Características
+
+- **Dashboard en Tiempo Real**: Añadido soporte para mostrar estadísticas del sistema en tiempo real en la interfaz web.
+- **Modo Oscuro/Claro**: Implementación de la funcionalidad para alternar entre modo oscuro y claro en la interfaz web.
+
+#### Mejoras
+
+- **Refactorización del Código**:
+  - Modularización del código: Creación de `shared.py` para gestionar usuarios autenticados y bloqueados de forma centralizada.
+  - Eliminación de dependencias de HTML y Flask desde `telegram_bot.py`.
+
+- **Interfaz Web**:
+  - Actualización de la plantilla `base.html` para incluir el soporte de modo oscuro/claro.
+  - Creación de `templates/dashboard.html` para mostrar el dashboard en tiempo real.
+  - Actualización de `templates/users.html` para mejorar la gestión de usuarios autenticados y bloqueados.
+  - Actualización de `templates/index.html` para reflejar los cambios en la configuración del bot y añadir nuevas opciones.
+
+- **Telegram Bot**:
+  - Optimización de la carga y guardado de usuarios autenticados y bloqueados mediante el uso del módulo `shared.py`.
+  - Mejora en el manejo de comandos y modularización de funcionalidades.
+
 
 ## Contribuciones
 
